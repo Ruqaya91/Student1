@@ -1,25 +1,37 @@
-<?php
-$dataFile = 'data.txt';
+<!DOCTYPE html>
+<html>
 
-if (file_exists($dataFile)) {
-    $data = file_get_contents($dataFile);
-    $users = explode("\n", trim($data));
+    <head>
+        <title> Register to my School </title>
+    </head>
 
-    echo "<h1>Registered Users</h1>";
+    <body>
+        <h1> Register Sheet </h1>
 
-    foreach ($users as $user) {
-        if (!empty($user)) {
-            list($fullName, $email, $phone, $profilePicPath, $transcriptPath) = explode(' | ', $user);
-            echo "<div style='border: 1px solid #ccc; padding: 10px; margin: 10px;'>";
-            echo "<p><strong>Full Name:</strong> $fullName</p>";
-            echo "<p><strong>Email:</strong> $email</p>";
-            echo "<p><strong>Phone:</strong> $phone</p>";
-            echo "<p><strong>Profile Picture:</strong><br><img src='$profilePicPath' alt='Profile Picture' style='width: 100px;'></p>";
-            echo "<p><strong>Transcript:</strong> <a href='$transcriptPath' download>Download Transcript</a></p>";
-            echo "</div>";
-        }
-    }
-} else {
-    echo "<p>No registrations found.</p>";
-}
-?>
+        <?php
+
+            if (file_exists('data.txt')) 
+            {
+                $lines = explode("\n", file_get_contents('data.txt'));
+
+                foreach ($lines as $line) 
+                {
+                    if (!empty($line)) 
+                    {
+                        $studInfo = explode(" | ", $line);
+
+                        echo "<p>   Full Name: " . htmlspecialchars($studInfo[0]) . "</p>";
+                        echo "<p>   Email: " . htmlspecialchars($studInfo[1]) . "</p>";
+                        echo "<p>   Phone Number: " . htmlspecialchars($studInfo[2]) . "</p>";
+                        echo "<p>   Profile Picture <img src='" . htmlspecialchars($studInfo[3]) . "' alt='Profile Picture' style='width:100px;'></p>";
+                        echo "<p>   Transcript: <a href='" . htmlspecialchars($studInfo[4]) . "' download>Click to download transcript</a></p>";
+                    }
+                }
+            }
+            else 
+            {
+                echo "<br>There is no data in the registration form, please go back and submit the form with all of your information put in.";
+            }
+        ?>
+    </body>
+</html>
