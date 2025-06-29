@@ -1,111 +1,84 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Regristration Form</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Form</title>
 </head>
 <body>
-	<style type="text/css">
-		body {
-			background-color: #95C8F6;
-			background-image: linear-gradient(to bottom, #fff, #95C876);
-			font-family: sans-serif;
-			padding: 0;
-			margin: 0;
-			display: flex;
-			flex-direction: column;
-			min-height: 100vh;
-			align-items: center;
-			padding-top: 50px;
-			justify-content: center;
-		}
+    <h1>Registration Form</h1>
+    <form method="POST" action="<?= htmlspecialchars($_SERVER['PHP_SELF']); ?>" enctype="multipart/form-data">
+        <label for="full_name">Full Name:</label><br>
+        <input type="text" id="full_name" name="full_name" required><br><br>
 
-		form {
-			background-color: #fff;
-			border: 1px solid #ccc;
-			border-radius: 15px;
-			max-width: 400px;
-			box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-			width: 100%;
-			margin: 0px;
-			min-height: 10vh;
-			padding: 30px;
-		}
+        <label for="email">Email:</label><br>
+        <input type="email" id="email" name="email" required><br><br>
 
-		label {
-			 display: block;
-			 font-weight: bold;
-			 padding: 10px;
-		}
+        <label for="phone">Phone Number:</label><br>
+        <input type="text" id="phone" name="phone" required><br><br>
 
-		input[type="text"],
-		input[type="email"],
-		input[type="Telephone"],
-		input[type="file"] {
-			width: 100%;
-			max-width: 350px;
-			font-size: 14px;
-		}
+        <label for="profile_picture">Profile Picture (JPG, PNG):</label><br>
+        <input type="file" id="profile_picture" name="profile_picture" accept="image/jpeg, image/png" required><br><br>
 
-		button {
-			padding: 10px 25px;
-			background-color: #F8DA1B;
-			color: black;
-			border: none;
-			display: block;
-			margin: 5px auto;
-			text-align: center;
-			cursor: pointer;
-		}
+        <label for="transcript">Transcript (PDF):</label><br>
+        <input type="file" id="transcript" name="transcript" accept="application/pdf" required><br><br>
 
-		button:hover {
-			background-color: #FFEC09;
-
-		}
-
-		a {
-			text-decoration: none;
-			padding: 15px, 25px;
-			color: black;
-			background-color: #F8DA1B;
-			text-align: center;
-			margin: 10px auto;
-		}
-
-		a:hover {
-			background-color: #FFEC09;
-		}
-	}
-	
-	</style>
-
-	<form method="POST" action="<?= $_SERVER['PHP_SELF'] ?>" ectype="multipart/form-data">
-		<h1>Registration Form</h1>
-
-		<label for="name">Name:</label>
-		<input type="text" id="name" name="name">
-		<br><br>
-
-		<label for="email">Email:</label>
-		<input type="text" id="email" name="email">
-		<br><br>
-
-		<label for="Telephone">Phone Number:</label>
-		<input type="Telephone" id="Telephone" name="Telephone">
-		<br><br>
-
-		<label for="profile_picture">Profile Picture:</label>
-		<input type="file" name="profile_picture" accept=".jpg, .png" required>
-		<br><br>
-
-		<label for="transcript">Transcripts:</label>
-		<input type="file" name="transcript" accept=".pdf" required>
-		<br><br>
-
-		<button type="submit">Submit</button>
-	</form>
-	<br>
-	<a href="view_registration.php">View Registrations</a>
+        <button type="submit">Register</button>
+    </form>
 </body>
 </html>
+
+<?php
+// registration.php
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Directory setup
+    $profileDir = 'uploads/profile_pictures/';
+    $transcriptDir = 'uploads/transcripts/';
+
+    // Ensure directories exist
+    if (!is_dir($profileDir)) mkdir($profileDir, 0777, true);
+    if (!is_dir($transcriptDir)) mkdir($transcriptDir, 0777, true);
+
+    // Input validation
+    $fullName = $_POST['full_name'] ?? '';
+    $email = $_POST['email'] ?? '';
+    $phone = $_POST['phone'] ?? '';
+
+    if (empty($fullName) || empty($email) || empty($phone)) {
+        echo "All fields are required.";
+        exit;
+    }
+
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        echo "Invalid email format.";
+        exit;
+    }
+
+    // Handle profile picture upload
+    if (!empty($_FILES['profile_picture']['tmp_name']) &&
+        in_array($_FILES['profile_picture']['type'], ['image/jpeg', 'image/png'])) {
+        $profileExt = pathinfo($_FILES['profile_picture']['name'], PATHINFO_EXTENSION);
+        $profilePath = $profileDir . 'profile_' . time() . '.' . $profileExt;
+        move_uploaded_file($_FILES['profile_picture']['tmp_name'], $profilePath);
+    } else {
+        echo "Invalid profile picture format. Only JPG and PNG are allowed.";
+        exit;
+    }
+
+    // Handle transcript upload
+    if (!empty($_FILES['transcript']['tmp_name']) && $_FILES['transcript']['type'] === 'application/pdf') {
+        $transcriptPath = $transcriptDir . 'transcript_' . time() . '.pdf';
+        move_uploaded_file($_FILES['transcript']['tmp_name'], $transcriptPath);
+    } else {
+        echo "Invalid transcript format. Only PDF is allowed.";
+        exit;
+    }
+
+    // Append data to text file
+    $userData = "$fullName | $email | $phone | $profilePath | $transcriptPath" . PHP_EOL;
+    file_put_contents('data.txt', $userData, FILE_APPEND);
+
+    echo "Registration successful!";
+}
+?>
+
