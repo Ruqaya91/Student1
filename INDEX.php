@@ -1,65 +1,102 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registration</title>
-</head>
-<body>
-    <h1>Registration</h1>
-    <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="POST" enctype="multipart/form-data">
-        <label for="full_name">Full Name:</label><br>
-        <input type="text" id="full_name" name="full_name" required><br><br>
+// Form
 
-        <label for="email">Email:</label><br>
-        <input type="email" id="email" name="email" required><br><br>
+<h1> Miami School  Registration</h1>
 
-        <label for="phone">Phone Number:</label><br>
-        <input type="text" id="phone" name="phone" required><br><br>
+<form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="POST" enctype="multipart/form-data">
 
-        <label for="profile_picture">Profile Picture (.jpg, .png):</label><br>
-        <input type="file" id="profile_picture" name="profile_picture" accept=".jpg, .png" required><br><br>
+    
+    <!-- Full Name -->
+    <input type="text" name="Full_Name" placeholder="Full Name" required><br><br>
 
-        <label for="transcript">Transcript (.pdf):</label><br>
-        <input type="file" id="transcript" name="transcript" accept=".pdf" required><br><br>
+    <!-- Email -->
+    <input type="email" name="Email" placeholder="Email" required><br><br>
 
-        <button type="submit" name="submit">Register</button>
-    </form>
+    <!-- Phone Number -->
+    <input type="text" name="phone_number" placeholder="Phone Number" required><br><br>
 
-    <?php
-    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-        $full_name = htmlspecialchars($_POST['full_name']);
-        $email = htmlspecialchars($_POST['email']);
-        $phone = htmlspecialchars($_POST['phone']);
+    <!-- Profile Picture -->
+    <input type="file" name="profile_picture" accept=".jpg, .png" required><br><br>
 
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            echo "<p>Invalid email format!</p>";
-            exit();
-        }
- 
-        $profileDir = "uploads/profile_pictures/";
-        $transcriptDir = "uploads/transcripts/";
+    <!-- Transcript -->
+    <input type="file" name="transcripts" accept=".pdf" required><br><br>
 
-        if (!is_dir($profileDir)) mkdir($profileDir, 0777, true);
-        if (!is_dir($transcriptDir)) mkdir($transcriptDir, 0777, true);
+    <!-- Submit -->
+    <input type="submit" value="Submit">
+</form>
 
-        $profileTmp = $_FILES['profile_picture']['tmp_name'];
-        $profileExt = pathinfo($_FILES['profile_picture']['name'], PATHINFO_EXTENSION);
-        $profileName = "profile_" . time() . "." . $profileExt;
-        $profilePath = $profileDir . $profileName;
-        move_uploaded_file($profileTmp, $profilePath);
 
-        $transcriptTmp = $_FILES['transcript']['tmp_name'];
-        $transcriptExt = pathinfo($_FILES['transcript']['name'], PATHINFO_EXTENSION);
-        $transcriptName = "transcript_" . time() . "." . $transcriptExt;
-        $transcriptPath = $transcriptDir . $transcriptName;
-        move_uploaded_file($transcriptTmp, $transcriptPath);
 
-        $data = "$full_name | $email | $phone | $profilePath | $transcriptPath\n";
-        file_put_contents("data.txt", $data, FILE_APPEND);
+// Processing and Validation
 
-        echo "<p>Registration successful!</p>";
+<?php 
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+    // form 
+    $name = $_POST["Full_Name"];
+    $email = $_POST["Email"];
+    $phone = $_POST["phone_number"];
+    $profilePicture = $_FILES["profile_picture"];
+    $transcripts = $_FILES["transcripts"];
+
+
+
+
+    // Validation
+    if (empty($name)) {
+        echo "This Field  is required.<br>";
     }
-    ?>
-</body>
-</html>
+
+    if (empty($email)) {
+        echo "Email is required.<br>";
+    } else if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        echo "This field is required.<br>";
+    }
+
+    if (empty($phone)) {
+        echo "This field is required.<br>";
+    }
+
+    if (empty($profilePicture["name"])) {
+        echo "Profile picture is mandatory.<br>";
+    } else if (!in_array(pathinfo($profilePicture["name"], PATHINFO_EXTENSION), ["jpg", "png"])) {
+        echo "Profile Picture must be a JPG or PNG file.<br>";
+
+
+    }
+
+    if (empty($transcripts["name"])) {
+        echo "Transcript is required.<br>";
+    } else if (pathinfo($transcripts["name"], PATHINFO_EXTENSION) != "pdf") {
+        echo "Transcript must be a PDF file.<br>";
+    }
+
+
+    
+    if (!empty($name) && !empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL) && !empty($phone) &&
+        !empty($profilePicture['name']) && in_array(pathinfo($profilePicture['name'], PATHINFO_EXTENSION), ['jpg', 'png']) &&
+        !empty($transcripts['name']) && pathinfo($transcripts['name'], PATHINFO_EXTENSION) == 'pdf') {
+
+
+
+
+
+//Paths
+    
+$profilePicturePath = "uploads/profile_pictures/" . time() . "_" . $profilePicture["name"];
+$transcriptPath = "uploads/transcripts/" . time() . "_" . $transcripts["name"];
+
+
+move_uploaded_file($profilePicture["tmp_name"], $profilePicturePath);
+move_uploaded_file($transcripts["tmp_name"], $transcriptPath);
+
+
+$data = $name . " | " . $email . " | " . $phone . " | " . $profilePicturePath . " | " . $transcriptPath . "\n";
+file_put_contents("data.txt", $data, FILE_APPEND);
+
+echo "Form submitted successfully!<br>";
+
+    }
+}
+?>
+
