@@ -1,80 +1,33 @@
-<head>
-    <title>Registration</title>
-</head>
-
-
-<?php
-
-
-//validate form data
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    if (empty($_POST['fullName']) || empty($_POST['email']) || empty($_POST['phoneNumber']) || empty($_FILES['pfp']) || empty($_FILES['transcripts'])) {
-        echo "Please fill out all of the fields!!";
-        exit;
-    }
-}
-
-    // checking the email
-    $email = filter_var($_POST['email'], FILTER_VALIDATE_EMAIL);
-    if (!$email) {
-        echo "Invalid email address!";
-        exit;
-    }
-
+    <?php
    
-    // create folder for uploads
-    if (!file_exists('uploads')) {
-        mkdir('uploads', 0777, true);  // 0777 gives read, write, and execute permissions
+
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+        $full_name = trim($_POST['full_name']);
+        $email = filter_var($_POST['email'], FILTER_VALIDATE_EMAIL);
+        $phone = trim($_POST['phone']);
+
+        $upload_dir = 'uploads/';
+        $profile_dir = $upload_dir . 'profile_pictures/';
+        $transcript_dir = $upload_dir . 'transcripts/';
+        
+        if (!is_dir($profile_dir)) mkdir($profile_dir, 0777, true);
+        if (!is_dir($transcript_dir)) mkdir($transcript_dir, 0777, true);
+        
+        $profile_pic = $_FILES['profile_picture'];
+        $transcript = $_FILES['transcript'];
+        
+        $profile_ext = pathinfo($profile_pic['name'], PATHINFO_EXTENSION);
+        $transcript_ext = pathinfo($transcript['name'], PATHINFO_EXTENSION);
+        
+        $profile_path = $profile_dir . 'profile_' . time() . '.' . $profile_ext;
+        $transcript_path = $transcript_dir . 'transcript_' . time() . '.' . $transcript_ext;
+        
+        if (move_uploaded_file($profile_pic['tmp_name'], $profile_path) && move_uploaded_file($transcript['tmp_name'], $transcript_path)) {
+            $data = "$full_name | $email | $phone | $profile_path | $transcript_path\n";
+            file_put_contents('data.txt', $data, FILE_APPEND);
+            echo "Registration successful. <a href='view_registration.php'>View Registrations</a>";
+        } else {
+            echo "File upload failed.";
         }
-   
-   
-    // picture upload and name change
-    $pfp = $_FILES['pfp'];
-    $pfp_name = "profile_" . time() . "." . pathinfo($pfp['name'], PATHINFO_EXTENSION);
-    $pfp_path = "uploads/pfps/" . $pfp_name;
-	// restriction on pictures for jpeg and png
-    if (!in_array($pfp['type'], ['image/jpeg', 'image/png'])) {
-        echo "Profile picture must be a .jpeg or .png file!";
-        exit;
     }
-
-    // pdf upload and name change
-    $transcripts = $_FILES['transcripts'];
-    $transcript_name = "transcript_" . time() . ".pdf";
-    $transcript_path = "uploads/transcripts/" . $transcript_name;
-	// restriction on file so its a pdf 
-    if ($transcripts['type'] != 'application/pdf') {
-        echo "Transcript must be a .pdf file!";
-        exit;
-    }
-
-    // create pfp folder
-    if (!file_exists('uploads/pfps')) {
-        mkdir('uploads/pfps', 0777, true);
-    }
-	//create transcript folder
-    if (!file_exists('uploads/transcripts')) {
-        mkdir('uploads/transcripts', 0777, true);
-    }
-
-
-    // created files move to new folders
-    move_uploaded_file($pfp['tmp_name'], $pfp_path);
-    move_uploaded_file($transcripts['tmp_name'], $transcript_path);
-
-
-    // appending the files to data.txt
-    $user_data = $_POST['fullName'] . " | " . $_POST['email'] . " | " . $_POST['phoneNumber'] . " | " . $pfp_path . " | " . $transcript_path . "\n";
-    file_put_contents('data.txt', $user_data, FILE_APPEND);
-	
-	
-	
-	
-	
-	// website message to user on successful registration
-	echo "<h1>Registration successful!</h1>";
-	echo "<a href=http://localhost/Projects/view_registration.php>View Registrations</a>";
-	
-	
-	
-?>
+    ?>
