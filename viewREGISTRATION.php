@@ -1,37 +1,41 @@
 <!DOCTYPE html>
-<html>
-
-    <head>
-        <title> Register to my School </title>
-    </head>
-
-    <body>
-        <h1> Register Sheet </h1>
-
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registered Students - FIU</title>
+    <link rel="stylesheet" href="template.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Registered Students</h1>
+        <a href="index.php">Back to Registration</a>
+        
         <?php
-
-            if (file_exists('data.txt')) 
-            {
-                $lines = explode("\n", file_get_contents('data.txt'));
-
-                foreach ($lines as $line) 
-                {
-                    if (!empty($line)) 
-                    {
-                        $studInfo = explode(" | ", $line);
-
-                        echo "<p>   Full Name: " . htmlspecialchars($studInfo[0]) . "</p>";
-                        echo "<p>   Email: " . htmlspecialchars($studInfo[1]) . "</p>";
-                        echo "<p>   Phone Number: " . htmlspecialchars($studInfo[2]) . "</p>";
-                        echo "<p>   Profile Picture <img src='" . htmlspecialchars($studInfo[3]) . "' alt='Profile Picture' style='width:100px;'></p>";
-                        echo "<p>   Transcript: <a href='" . htmlspecialchars($studInfo[4]) . "' download>Click to download transcript</a></p>";
-                    }
+        $file = __DIR__ . "/data.txt";
+        if (file_exists($file)) {
+            $entries = file($file, FILE_IGNORE_NEW_LINES);
+            if (count($entries) > 0) {
+                echo "<ul>";
+                foreach ($entries as $entry) {
+                    list($fullName, $email, $phone, $profilePicPath, $transcriptPath) = explode(" | ", $entry);
+                    echo "<li class='student'>
+                            <strong>Name:</strong> $fullName <br>
+                            <strong>Email:</strong> $email <br>
+                            <strong>Phone:</strong> $phone <br>
+                            <strong>Profile Picture:</strong> <br> 
+                            <img src='$profilePicPath' alt='Profile Picture' width='100'> <br>
+                            <strong>Transcript:</strong> <a href='$transcriptPath' download>Download Transcript</a>
+                          </li>";
                 }
+                echo "</ul>";
+            } else {
+                echo "<p>No registered students yet.</p>";
             }
-            else 
-            {
-                echo "<br>There is no data in the registration form, please go back and submit the form with all of your information put in.";
-            }
+        } else {
+            echo "<p>No data found.</p>";
+        }
         ?>
-    </body>
+    </div>
+</body>
 </html>
