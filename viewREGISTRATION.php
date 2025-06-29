@@ -1,41 +1,19 @@
 <?php
- 
+
+$data_contents = file_get_contents("data.txt");
+
+$user_array = explode("\n", $data_contents); //split data by line
+
+array_pop($user_array); // remove trailing newline
+
+foreach ($user_array as $index=>$user) {
+	echo "<h2>User $index</h2>";
+	$userdata = explode(",", $user);
+	echo "Name: $userdata[0]<br>";
+	echo "Email: $userdata[1]<br>";
+	echo "Phone: $userdata[2]<br>";
+	echo "Profile Picture: <br><img src=$userdata[3] width=100 height=100><br>";
+	echo "<a href=$userdata[4] download>Transcript</a>";
+}
+
 ?>
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>View Registrations</title>
-        <link rel="stylesheet" type="text/css" href="styles/view_registration.css">
-    </head>
-    <body>
-        <h2>Registered Users</h2>
-        <?php
-        $data_file = 'data.txt';
-        if (file_exists($data_file)) {
-            $entries = file($data_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-            echo "<table>
-                    <tr>
-                        <th>Full Name</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th>Profile Picture</th>
-                        <th>Transcript</th>
-                    </tr>";
-            
-            foreach ($entries as $entry) {
-                list($full_name, $email, $phone, $profile_path, $transcript_path) = explode(' | ', $entry);
-                echo "<tr>
-                        <td>$full_name</td>
-                        <td>$email</td>
-                        <td>$phone</td>
-                        <td><img src='$profile_path' width='100'></td>
-                        <td><a href='$transcript_path' target='_blank'>Download</a></td>
-                    </tr>";
-            }
-            echo "</table>";
-        } else {
-            echo "<p class='no-data'>No registrations found.</p>";
-        }
-        ?>
-    </body>
-    </html>
