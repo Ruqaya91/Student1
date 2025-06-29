@@ -1,43 +1,73 @@
 <?php
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Form handling logic here
+    $fullName = $_POST['full_name'];
+    $email = $_POST['email'];
+    $phone = $_POST['phone'];
+    
+    // Validate email
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        echo "Invalid email format";
+    } else {
+        // Handle file uploads
+        $profilePicture = $_FILES['profile_picture'];
+        $transcript = $_FILES['transcript'];
 
-    $required_fields = ['full_name', 'email', 'phone_number', 'profile_picture', 'transcripts'];
-    foreach ($required_fields as $field) {
-        if (empty($_POST[$field]) && !isset($_FILES[$field])) {
-            echo "All fields are required.";
-            exit;
+        // Validate files
+        if ($profilePicture['type'] != 'image/jpeg' && $profilePicture['type'] != 'image/png') {
+            echo "Profile picture must be a .jpg or .png file";
+        } elseif ($transcript['type'] != 'application/pdf') {
+            echo "Transcript must be a .pdf file";
+        } else {
+            // Rename files with timestamp for uniqueness
+            $profilePictureName = 'profile_' . time() . '.' . pathinfo($profilePicture['name'], PATHINFO_EXTENSION);
+            $transcriptName = 'transcript_' . time() . '.pdf';
+            
+            // Define upload directories
+            $profilePicturePath = 'uploads/profile_pictures/' . $profilePictureName;
+            $transcriptPath = 'uploads/transcripts/' . $transcriptName;
+
+            // Move the uploaded files
+            move_uploaded_file($profilePicture['tmp_name'], $profilePicturePath);
+            move_uploaded_file($transcript['tmp_name'], $transcriptPath);
+
+            // Prepare data for saving
+            $userData = $fullName . ' | ' . $email . ' | ' . $phone . ' | ' . $profilePicturePath . ' | ' . $transcriptPath . "\n";
+
+            // Save user data to data.txt
+            file_put_contents('data.txt', $userData, FILE_APPEND);
+            echo "Registration successful!";
         }
     }
-
-    
-    if (!filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
-        echo "Invalid email address.";
-        exit;
-    }
-
-    
-    function handleFileUpload($file, $allowed_extensions, $directory, $prefix) {
-        $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
-        if (!in_array($extension, $allowed_extensions)) {
-            echo "Invalid file type for " . $file['name'];
-            exit;
-        }
-        $filename = $prefix . '_' . time() . '.' . $extension;
-        $path = $directory . '/' . $filename;
-        move_uploaded_file($file['tmp_name'], $path);
-        return $path;
-    }
-
-    
-    $profile_picture_path = handleFileUpload($_FILES['profile_picture'], ['jpg', 'png'], 'uploads/profile_pictures', 'profile');
-    $transcript_path = handleFileUpload($_FILES['transcripts'], ['pdf'], 'uploads/transcripts', 'transcript');
-
-    
-    $user_data = htmlspecialchars($_POST['full_name']) . ' | ' . htmlspecialchars($_POST['email']) . ' | ' . htmlspecialchars($_POST['phone_number']) . ' | ' . $profile_picture_path . ' | ' . $transcript_path . "\n";
-
-    
-    file_put_contents('data.txt', $user_data, FILE_APPEND);
-
-    echo "You have been Succefully Registred! <a href='view_registration.php'>View all registrations</a>";
 }
 ?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Form</title>
+</head>
+<body>
+    <h1>Register for School Admission</h1>
+    <form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" enctype="multipart/form-data">
+        <label for="full_name">Full Name:</label>
+        <input type="text" id="full_name" name="full_name" required><br><br>
+        
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required><br><br>
+        
+        <label for="phone">Phone Number:</label>
+        <input type="text" id="phone" name="phone" required><br><br>
+        
+        <label for="profile_picture">Profile Picture:</label>
+        <input type="file" id="profile_picture" name="profile_picture" accept=".jpg, .png" required><br><br>
+        
+        <label for="transcript">Transcript:</label>
+        <input type="file" id="transcript" name="transcript" accept=".pdf" required><br><br>
+        
+        <button type="submit">Submit</button>
+    </form>
+</body>
+</html>
