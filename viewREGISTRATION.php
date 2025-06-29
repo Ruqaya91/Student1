@@ -3,39 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registered Students - FIU</title>
-    <link rel="stylesheet" href="template.css">
+    <title>View Registration</title>
 </head>
 <body>
-    <div class="container">
-        <h1>Registered Students</h1>
-        <a href="index.php">Back to Registration</a>
-        
-        <?php
-        $file = __DIR__ . "/data.txt";
-        if (file_exists($file)) {
-            $entries = file($file, FILE_IGNORE_NEW_LINES);
-            if (count($entries) > 0) {
-                echo "<ul>";
-                foreach ($entries as $entry) {
-                    list($fullName, $email, $phone, $profilePicPath, $transcriptPath) = explode(" | ", $entry);
-                    echo "<li class='student'>
-                            <strong>Name:</strong> $fullName <br>
-                            <strong>Email:</strong> $email <br>
-                            <strong>Phone:</strong> $phone <br>
-                            <strong>Profile Picture:</strong> <br> 
-                            <img src='$profilePicPath' alt='Profile Picture' width='100'> <br>
-                            <strong>Transcript:</strong> <a href='$transcriptPath' download>Download Transcript</a>
-                          </li>";
-                }
-                echo "</ul>";
-            } else {
-                echo "<p>No registered students yet.</p>";
-            }
-        } else {
-            echo "<p>No data found.</p>";
+    <h1>Registered Users</h1>
+    <?php
+    $dataFile = "data.txt";
+
+    if (file_exists($dataFile)) {
+        $data = file_get_contents($dataFile);
+        $lines = explode("\n", trim($data));
+
+        foreach ($lines as $line) {
+            list($full_name, $email, $phone, $profilePath, $transcriptPath) = explode(" | ", $line);
+
+            echo "<div style='border: 1px solid #000; margin-bottom: 10px; padding: 10px;'>";
+            echo "<p><strong>Full Name:</strong> $full_name</p>";
+            echo "<p><strong>Email:</strong> $email</p>";
+            echo "<p><strong>Phone Number:</strong> $phone</p>";
+            echo "<p><strong>Profile Picture:</strong></p>";
+            echo "<img src='$profilePath' alt='Profile Picture' style='max-width: 100px;'><br>";
+            echo "<p><strong>Transcript:</strong> <a href='$transcriptPath' download>Download</a></p>";
+            echo "</div>";
         }
-        ?>
-    </div>
+    } else {
+        echo "<p>No registrations found.</p>";
+    }
+    ?>
 </body>
 </html>
+
+
