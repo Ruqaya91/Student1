@@ -1,19 +1,23 @@
 <?php
-
-$data_contents = file_get_contents("data.txt");
-
-$user_array = explode("\n", $data_contents); //split data by line
-
-array_pop($user_array); // remove trailing newline
-
-foreach ($user_array as $index=>$user) {
-	echo "<h2>User $index</h2>";
-	$userdata = explode(",", $user);
-	echo "Name: $userdata[0]<br>";
-	echo "Email: $userdata[1]<br>";
-	echo "Phone: $userdata[2]<br>";
-	echo "Profile Picture: <br><img src=$userdata[3] width=100 height=100><br>";
-	echo "<a href=$userdata[4] download>Transcript</a>";
+$data = file_get_contents('data.txt');
+if (!$data) {
+    echo "No registration data available.";
+    exit;
 }
 
+echo "<h2>Registered Users</h2>";
+foreach (explode("\n", $data) as $line) {
+    if (!$line) continue;
+
+
+    list($full_name, $email, $phone_number, $profile_picture_path, $transcript_path) = explode(' | ', $line);
+
+    echo "<div>";
+    echo "<h3>$full_name</h3>";
+    echo "<p><strong>Email:</strong> $email</p>";
+    echo "<p><strong>Phone:</strong> $phone_number</p>";
+    echo "<p><strong>Profile Picture:</strong> <img src='$profile_picture_path' width='100'></p>";
+    echo "<p><strong>Transcript:</strong> <a href='$transcript_path' download>Download Transcript</a></p>";
+    echo "</div><hr>";
+}
 ?>
