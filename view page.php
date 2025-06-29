@@ -1,39 +1,38 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html>
 <head>
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Registrations</title>
-
-</head>
-
-<body>
-
-    <h1>Registered Users 👥</h1>
-    <a href="index.php">Back to Registration Page ⬅</a><br><br>
-
-    <?php
-    if (file_exists('data.txt')) {
-        $user_data = file_get_contents('data.txt');
-        $users = explode(PHP_EOL, trim($user_data));
-
-        foreach ($users as $user) {
-            list($fullname, $email, $phone, $profile_picture, $transcript) = explode(' | ', $user);
-
-            echo "<div style='border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;'>";
-            echo "<p><strong>Full Name:</strong> $fullname</p>";
-            echo "<p><strong>Email:</strong> $email</p>";
-            echo "<p><strong>Phone Number:</strong> $phone</p>";
-            echo "<p><strong>Profile Picture:</strong><br><img src='$profile_picture' width='100'></p>";
-            echo "<p><strong>Transcript:</strong> <a href='$transcript' download>Download Transcript</a></p>";
-            echo "</div>";
+    <style>
+        span {
+            display: flex;
+            align-items: center;
         }
-    } else {
-        echo "<p>No registrations found.</p>";
+        img {
+            display: inline-block;
+            height: 75px;
+        }
+    </style>
+</head>
+<body>
+<a href=index.php>Return to main page</a>
+<br><br>
+<?php
+    $data = file_get_contents('data.txt');
+    if (!$data) {
+        echo "An error occured.";
+        exit();
     }
-    ?>
-    
+    $lines = explode("\n", $data);
+    foreach ($lines as $line) {
+        if ($line == '') continue;
+        $fields = explode(" | ", $line);
+        echo '<span>';
+        echo 'Name: '.$fields[0].', ';
+        echo 'Email: '.$fields[1].', ';
+        echo 'Phone number: '.$fields[2].' ';
+        echo '<img src="'.$fields[3].'"> ';
+        echo '<a href="'.$fields[4].'">Transcript</a>';
+        echo '</span><br>';
+    }
+?>
 </body>
 </html>
