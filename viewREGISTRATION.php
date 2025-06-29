@@ -1,93 +1,76 @@
 <?php
-$dataFile = "data.txt";
-
-if (!file_exists($dataFile)) {
-    die("No registrations found.");
-}
-
-$entries = file($dataFile, FILE_IGNORE_NEW_LINES);
+$dataFile = 'data.txt';
+$registrations = file_exists($dataFile) ? file($dataFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) : [];
 ?>
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registered Users</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background: linear-gradient(45deg, #210B2C, #55286F, #BC96E6, #D8B4E2, #AE759F);
-            color: #ffffff;
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            padding-top: 50px; /* Small adjustment to position content better */
+            background-color: #f4f4f4;
+            margin: 20px;
         }
 
-        h2 {
-            color: #ffffff;
+        h1 {
             text-align: center;
-            text-shadow: 1px 1px 2px #000000;
+            color: #333;
         }
 
-        .user-container {
-            max-width: 600px;
-            margin: 2em auto;
-            padding: 1em;
-            background-color: rgba(255, 255, 255, 0.9);
-            border: 1px solid #e0e0e0;
+        .registration-card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 15px 0;
             border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
         }
 
-        .user {
-            margin-bottom: 1.5em;
+        .registration-card p {
+            margin: 10px 0;
         }
 
-        p {
-            color: #000000;
+        .registration-card img {
+            border-radius: 50%;
+            max-width: 80px;
+            height: auto;
         }
 
-        img {
-            display: block;
-            margin: 0 auto;
-        }
-
-        hr {
-            border: 0;
-            border-top: 1px solid #e0e0e0;
-            margin: 1em 0;
-        }
-
-        a {
-            color: #ffffff;
+        .download-link {
             text-decoration: none;
-            text-align: center;
-            display: block;
-            margin-top: 1em;
+            color: #007bff;
+            font-weight: bold;
         }
 
-        a:hover {
-            color: #BC96E6;
+        .download-link:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-<h2>Registered Users</h2>
-<?php foreach ($entries as $entry):
-    list($fullName, $email, $phone, $profilePath, $transcriptPath) = explode(" | ", $entry);
-    ?>
-    <p><strong>Name:</strong> <?php echo htmlspecialchars($fullName); ?></p>
-    <p><strong>Email:</strong> <?php echo htmlspecialchars($email); ?></p>
-    <p><strong>Phone:</strong> <?php echo htmlspecialchars($phone); ?></p>
-    <p><strong>Profile Picture:</strong> <br><br>
-        <img src="<?php echo htmlspecialchars($profilePath); ?>" width="100">
-    </p>
-    <p><strong>Transcript:</strong> <a href="<?php echo htmlspecialchars($transcriptPath); ?>" download>Download</a></p>
-    <hr>
-<?php endforeach; ?>
+    <h1>Registered Users</h1>
+    <?php if (!empty($registrations)): ?>
+        <?php foreach ($registrations as $registration): ?>
+            <?php 
+                list($fullName, $email, $phone, $profilePath, $transcriptPath) = explode(' | ', $registration);
+            ?>
+            <div class="registration-card">
+                <p><strong>Full Name:</strong> <?= htmlspecialchars($fullName) ?></p>
+                <p><strong>Email:</strong> <?= htmlspecialchars($email) ?></p>
+                <p><strong>Phone:</strong> <?= htmlspecialchars($phone) ?></p>
+                <p><strong>Profile Picture:</strong><br>
+                    <img src="<?= htmlspecialchars($profilePath) ?>" alt="Profile Picture">
+                </p>
+                <p><strong>Transcript:</strong> 
+                    <a href="download.php?file=<?= urlencode(trim($transcriptPath)) ?>" class="download-link">Download Transcript</a>
+                </p>
+            </div>
+        <?php endforeach; ?>
+    <?php else: ?>
+        <p>No registrations found.</p>
+    <?php endif; ?>
 </body>
 </html>
