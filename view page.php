@@ -1,61 +1,29 @@
+<!-- view_registration.php -->
 <?php
-$data_txt_file = 'data.txt';
+$file = 'data.txt';
+if (file_exists($file)) {
+    $user_data = file_get_contents($file);
+    $users = explode("\n", $user_data);
 
-// Check for file
-if (file_exists($data_txt_file)) {
-    // Read data.txt
-    $student_data = file_get_contents($data_txt_file);
+    foreach ($users as $user) {
+        if (!empty($user)) {
+            $user_details = explode(' | ', $user);
 
-    // Intialize variables
-    $full_name = '';
-    $email = '';
-    $phone = '';
-    $profile_pic_path = '';
-    $transcripts_path = '';
+            $fullname = $user_details[0];
+            $email = $user_details[1];
+            $phone = $user_details[2];
+            $profile_picture_path = $user_details[3];
+            $transcript_path = $user_details[4];
 
-    $start = 0;
-    $field_count = 0;
-    $line_length = strlen($student_data);
-
-    // Split the content
-    $current_field = '';
-    for ($i = 0; $i < $line_length; $i++) {
-        if ($student_data[$i] != '|' && $student_data[$i] != "\n") {
-            
-            $current_field .= $student_data[$i];
-        } else {
-            
-            if ($field_count == 0) {
-                $full_name = $current_field; 
-            } elseif ($field_count == 1) {
-                $email = $current_field; 
-            } elseif ($field_count == 2) {
-                $phone = $current_field; 
-            } elseif ($field_count == 3) {
-                $profile_pic_path = $current_field; 
-            } elseif ($field_count == 4) {
-                $transcripts_path = $current_field; 
-            }
-
-            $field_count++; 
-            $current_field = ''; 
+            echo "<h3>User Information</h3>";
+            echo "<strong>Full Name:</strong> $fullname<br>";
+            echo "<strong>Email:</strong> $email<br>";
+            echo "<strong>Phone:</strong> $phone<br>";
+            echo "<strong>Profile Picture:</strong><br><img src='$profile_picture_path' width='100' height='100'><br>";
+            echo "<strong>Transcript:</strong><br><a href='$transcript_path' download>Download Transcript</a><br><br>";
         }
     }
-
-    // Check data for each field
-    if ($field_count == 5) {
-        // Display student data
-        echo "<h1>Student Registered</h1>";
-        echo "<p><strong>Full Name:</strong> $full_name</p>";
-        echo "<p><strong>Email:</strong> $email</p>";
-        echo "<p><strong>Phone Number:</strong> $phone</p>";
-        echo "<p><strong>Profile Picture:</strong><br><img src='$profile_pic_path' style='width: 200px;'></p>";
-        echo "<p><strong>Transcript File:</strong> <a href='$transcripts_path' download>Download Transcript</a></p>";
-    } else {
-        echo "<p>Missing data.</p>";
-    }
 } else {
-    echo "<p>No data found.</p>";
+    echo "No user data found.";
 }
-
 ?>
