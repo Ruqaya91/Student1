@@ -1,36 +1,25 @@
 <?php
+// view_registration.php
+$dataFile = 'data.txt';
 
-$registrations = file_get_contents('data.txt');
-if ($registrations === false) {
-	die('Failed to read registrations file.');
+if (file_exists($dataFile)) {
+    $registrations = file_get_contents($dataFile);
+    $lines = explode(PHP_EOL, trim($registrations));
+
+    echo "<h1>Registered Users</h1>";
+
+    foreach ($lines as $line) {
+        list($name, $email, $phone, $profilePath, $transcriptPath) = explode(' | ', $line);
+
+        echo "<div>";
+        echo "<p><strong>Full Name:</strong> $name</p>";
+        echo "<p><strong>Email:</strong> $email</p>";
+        echo "<p><strong>Phone:</strong> $phone</p>";
+        echo "<p><strong>Profile Picture:</strong><br><img src='$profilePath' alt='Profile Picture' width='100'></p>";
+        echo "<p><strong>Transcript:</strong><br><a href='$transcriptPath' download>Download Transcript</a></p>";
+        echo "</div><hr>";
+    }
+} else {
+    echo "No registrations found.";
 }
-
-$lines = explode(PHP_EOL, $registrations);
 ?>
-
-<!DOCTYPE html>
-<html>
-<head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>View Registration</title>
-</head>
-<body>
-	<h1>Registered Users</h1>
-	<?php foreach ($lines as $line): ?>
-		<?php if (trim($line) !== ''): ?>
-			<?php
-			list($name, $email, $phone, $profilePath, $transcriptPath) = explode('|', $line);
-			<div> 
-				<p><strong>Name:</strong> <?= htmlspecialchars($name) ?></p>
-				<p><strong>Email:</strong> <?= htmlspecialchars($email) ?></p>
-				<p><strong>Phone:</strong> <?= htmlspecialchars($Telephone) ?></p>
-				<p><strong>Profile picture:</strong> <?= htmlspecialchars($profilePath) ?>" alt="Profile Picture" style="width:150px;"></p>
-				<p><strong>Transcript:</strong> <?= htmlspecialchars($transcriptPath) ?></p>
-
-			</div>	
-			<hr>
-		<?php endif; ?>
-	<?php endforreach; ?>
-</body>
-</html>
